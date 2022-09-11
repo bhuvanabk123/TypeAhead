@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location Search</title>
+    <link href="styles.css" rel="stylesheet">
+</head>
+
+<body>
+    <form class="search-form">
+        <input type="text" class="search" placeholder="Search for your Location">
+        <ul class="suggestions">
+            <li>Filter by City</li>
+            <li>Or by Country</li>
+        </ul>
+    </form>
+    <script>
+        const hugeArray = 'https://gist.githubusercontent.com/Miserlou/c5cd8364bf9b2420bb29/raw/2bf258763cdddd704f8ffd3ea9a3e81d25e2c6f6/cities.json';
+
+        const cities = [];
+
+        fetch(hugeArray).then(blob => blob.json())
+            .then(data => cities.push(...data));
+
+        const searchInput = document.querySelector('.search');
+        const suggestion = document.querySelector('.suggestions');
+
+        searchInput.addEventListener('change', displayMatches);
+        searchInput.addEventListener('keyup', displayMatches);
+
+        function findMatches(inputWord, cities) {
+            return cities.filter(place => {
+
+                const regex = new RegExp(inputWord, 'gi');
+                return place.city.match(regex) || place.state.match(regex);
+            });
+
+        }
+
+        function displayMatches() {
+            const matchArray = findMatches(this.value, cities);
+            const html = matchArray.map(place => {
+                const regex = new RegExp(this.value, 'gi');
+                const cityName = place.city.replace(regex, `<span class="hl">
+                    ${this.value}</span>`)
+                return `
+                <li>
+                    <span class='name'>${cityName}, ${place.state}</span>
+                    <span class='population'>${place.population}</span>
+                    
+                </li>
+                `;
+
+            }).join(' ')
+            suggestion.innerHTML = html;
+        }
+
+    </script>
+
+</body>
+
+</html>
